@@ -1,0 +1,83 @@
+@font-face {
+	font-family: hello;
+	src: url('hello.ttf');
+}
+
+.newStickyButton {
+	transition-property: width, height;
+	-webkit-transition-property: width, height;
+	transition-duration: 0.5s;
+	transition-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1.0);
+	-webkit-user-select: none;
+	user-select: none;
+	-moz-user-select: none;
+	position: relative;
+	width: 60px;
+	height: 60px;
+	border-style: dotted;
+	border-width: 5px;
+	border-radius: 10px;
+	border-color: #999999;
+	background-color: #eeeeee;
+    box-shadow: 2px 2px 3px #aaaaaa;
+    z-index: 1;
+}
+
+.newStickyButtonExpanding {
+	width: 200px;
+	height: 200px;
+}
+
+.newStickyButtonExpanded {
+	position: relative;
+	width: 200px;
+	min-height: 200px;
+	border-style: dotted;
+	border-width: 5px;
+	border-radius: 10px;
+	border-color: #999999;
+	background-color: #eeeeee;
+    box-shadow: 2px 2px 3px #aaaaaa;
+}
+
+.stickyContentBlock {
+	font-size:28px;
+	font-family: hello;
+	margin: 10px;
+	min-height: 180px;
+	background-color: transparent;
+}
+
+.sticky {
+	transition-property: border-style, border-width, border-radius, border-color, background-color, box-shadow;
+	-webkit-transition-property: border-style, border-width, border-radius, border-color, background-color, box-shadow;
+	transition-duration: 2s;
+	transition-timing-function: linear;
+	position: absolute;
+	width: 210px;
+	min-height: 210px;
+	background-color: #FCF0AD;
+    box-shadow: 2px 2px 3px #aaaaaa;
+	border-width: 0px;
+	border-radius: 0px;
+	border-style: none;
+	z-index: 10;
+}
+
+.noTransition {
+	transition-property:none;
+	-webkit-transition-property:none;
+}
+
+.plusIcon {
+	transition-property: opacity;
+	-webkit-transition-property: opacity;
+	transition-duration: 0.5s;
+	transition-timing-function: linear;
+	width: 60px;
+	height: 60px;
+}
+
+.plusIconInvisible {
+	opacity: 0;
+}
