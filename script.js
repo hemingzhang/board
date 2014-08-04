@@ -135,16 +135,19 @@ newSticky.prototype.expand = function() {
 	this.handleEvent = function (e) {
 		switch (e.type) {
 			case "mousedown":
-				if (e.toElement == this.element) document.body.addEventListener('mousemove', this);
+				if (e.toElement == this.element) {
+					document.body.addEventListener('mousemove', this);
+					document.body.addEventListener('mouseup', this);
+				}
 				break;
 			case "mouseup":
 				document.body.removeEventListener('mousemove', this);
+				document.body.removeEventListener('mouseup', this);
 				if (this.isBeingDragged) {
 					this.isBeingDragged = false;
 					// this.sticky = new sticky(this.element);
 					this.stickyController.addSticky(this.element);
 					this.element.removeEventListener('mousedown', this);
-					this.element.removeEventListener('mouseup', this);
 				}
 				break;
 			case "mousemove":
@@ -197,7 +200,7 @@ newSticky.prototype.expand = function() {
 	this.plusElement.className += " plusIconInvisible";
 
 	this.element.addEventListener('mousedown', this);
-	this.element.addEventListener('mouseup', this);
+	// this.element.addEventListener('mouseup', this);
 
 }
 
@@ -215,10 +218,12 @@ function sticky(stickyElement, stickyController, id) {
 			case "mousedown":
 				if (e.toElement == this.element) {
 					document.body.addEventListener('mousemove', this);
+					document.body.addEventListener('mouseup', this);
 				}
 				break;
 			case "mouseup":
 				document.body.removeEventListener('mousemove', this);
+				document.body.removeEventListener('mouseup', this);
 				if (this.isBeingDragged) {
 					this.stickyController.stickyPutDown(this.id);
 					this.isBeingDragged = false;
@@ -245,7 +250,6 @@ function sticky(stickyElement, stickyController, id) {
 	};
 
 	this.element.addEventListener('mousedown', this);
-	this.element.addEventListener('mouseup', this);
 }
 
 function alnumRandom() {
