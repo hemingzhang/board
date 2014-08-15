@@ -43,6 +43,27 @@ function stickyController(containingElement){
 	}
 }
 
+stickyController.prototype.updateStickies(newStickies) {
+	//check for deletions
+	for (stickyID in this.stickies) {
+		if (newStickies[stickyID] === undefined) {
+			this.deleteSticky(sticky);
+		}
+	}
+
+	for (stickyID in newStickies) {
+		if (this.stickies[stickyID] === undefined) {
+			// add new sticky
+		}
+		else {
+			// update sticky
+			this.stickies[stickyID].x = newStickies[stickyID].x;
+			this.stickies[stickyID].y = newStickies[stickyID].y;
+			this.stickies[stickyID].content = newStickies[stickyID].content;
+			this.stickies[stickyID].refreshElement();
+		}
+}
+
 stickyController.prototype.addSticky = function(element) {
 	do {
 		for(var l = ''; l.length < 5;) l+=alnumRandom();
@@ -253,6 +274,17 @@ function sticky(stickyElement, stickyController, id) {
 	};
 
 	this.element.addEventListener('mousedown', this);
+}
+
+sticky.prototype.createElement(stickyController) {
+	var element = document.createElement('div');
+	element.className = "sticky";
+	stickyController.containingElement.appendChild(element);
+	return element;
+}
+
+sticky.prototype.refreshElement() {
+
 }
 
 function alnumRandom() {
