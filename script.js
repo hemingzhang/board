@@ -151,6 +151,7 @@ newSticky.prototype.expand = function() {
 				}
 				break;
 			case "mousemove":
+				console.log(e);
 				if (this.element.className != "sticky") this.element.className = "sticky";
 				if (!this.isBeingDragged) {
 					this.initialX = e.clientX - (this.element.getBoundingClientRect().left 
@@ -206,6 +207,7 @@ newSticky.prototype.expand = function() {
 
 function sticky(stickyElement, stickyController, id) {
 	this.element = stickyElement;
+	this.contentBlockElement = this.element.children[0];
 	this.stickyController = stickyController;
 
 	this.isBeingDragged = false;
@@ -227,11 +229,12 @@ function sticky(stickyElement, stickyController, id) {
 				if (this.isBeingDragged) {
 					this.stickyController.stickyPutDown(this.id);
 					this.isBeingDragged = false;
+					this.element.className = "sticky";
 				}
 				break;
 			case "mousemove":
-				if (this.element.className != "sticky") this.element.className = "sticky";
 				if (!this.isBeingDragged) {
+					if (this.element.className != "sticky unselectable") this.element.className = "sticky unselectable";
 					this.stickyController.stickyPickUp(this.id);
 					this.initialX = e.clientX - (this.element.getBoundingClientRect().left 
 						- this.stickyController.containingElement.getBoundingClientRect().left);
