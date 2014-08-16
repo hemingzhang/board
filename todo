@@ -1,0 +1,12 @@
+todo
+
+investigate sticky shifting over when put down after being newly created
+move stickies smoothly when window is being resized
+implement sticky text change api handling
+implement transition when sticky is removed upon fetching new stickies
+implement transition when sticky is moved upon fetching new stickies
+implement z-index shuffling so the currently focused sticky rises to the top
+
+eventually
+
+image sticky support

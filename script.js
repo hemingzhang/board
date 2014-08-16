@@ -7,6 +7,7 @@ function stickyController(containingElement, endpoint){
 	this.xButton = document.createElement('div');
 	this.currentDrag = undefined;
 	this.xButtonHover = false;
+	this.requestsInProgress = 0;
 
 	this.xButton.className = "xButton";
 	this.xButton.style.right = "8px";
@@ -42,10 +43,15 @@ function stickyController(containingElement, endpoint){
 				// break;
 		// }
 	}
+
+	setInterval(function(){
+		if (this.requestsInProgress == 0) this.fetchStickies();
+	}.bind(this), 1000);
 }
 
 stickyController.prototype.hitAPI = function(params){
 	var controller = this;
+	this.requestsInProgress++;
 	var xhr = new XMLHttpRequest();
 	var query = "";
 	for (key in params) query += (key + "=" + encodeURIComponent(params[key]) + "&");
@@ -53,6 +59,7 @@ stickyController.prototype.hitAPI = function(params){
 	xhr.open("GET", this.endpoint + "?" + query + Date.now());
 	xhr.onload = function(e) {
 		controller.updateStickies(JSON.parse(this.responseText));
+		controller.requestsInProgress--;
 	}
 	xhr.send();
 }
@@ -78,11 +85,13 @@ stickyController.prototype.updateStickies = function(newStickies) {
 		}
 		else {
 			// update sticky
-			this.stickies[stickyID].x = newStickies[stickyID].x;
-			this.stickies[stickyID].y = newStickies[stickyID].y;
-			this.stickies[stickyID].content = newStickies[stickyID].content;
-			console.log(newStickies[stickyID].content);
-			this.stickies[stickyID].refreshElement();
+			if(stickyID != this.currentDrag){
+				this.stickies[stickyID].x = newStickies[stickyID].x;
+				this.stickies[stickyID].y = newStickies[stickyID].y;
+				this.stickies[stickyID].content = newStickies[stickyID].content;
+				console.log(newStickies[stickyID].content);
+				this.stickies[stickyID].refreshElement();
+			}
 		}
 	}
 }
