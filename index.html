@@ -5,8 +5,10 @@
 		<script type="text/javascript" src="script.js">
 		</script>
 		<script type="text/javascript">
+			restEndPoint = "rest/";
 			window.onload = function(){
-				controller = new stickyController(document.body);
+				controller = new stickyController(document.body, restEndPoint);
+				controller.fetchStickies();
 			}
 		</script>
 	</head>

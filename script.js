@@ -1,6 +1,7 @@
 // script.js
-function stickyController(containingElement){
+function stickyController(containingElement, endpoint){
 	this.containingElement = containingElement;
+	this.endpoint = endpoint;
 	this.addNewSticky();
 	this.stickies = {};
 	this.xButton = document.createElement('div');
@@ -43,25 +44,78 @@ function stickyController(containingElement){
 	}
 }
 
-stickyController.prototype.updateStickies(newStickies) {
+stickyController.prototype.hitAPI = function(params){
+	var controller = this;
+	var xhr = new XMLHttpRequest();
+	var query = "";
+	for (key in params) query += (key + "=" + encodeURIComponent(params[key]) + "&");
+	console.log(query);
+	xhr.open("GET", this.endpoint + "?" + query + Date.now());
+	xhr.onload = function(e) {
+		controller.updateStickies(JSON.parse(this.responseText));
+	}
+	xhr.send();
+}
+
+stickyController.prototype.fetchStickies = function(){
+	this.hitAPI({});
+}
+
+stickyController.prototype.updateStickies = function(newStickies) {
 	//check for deletions
 	for (stickyID in this.stickies) {
 		if (newStickies[stickyID] === undefined) {
-			this.deleteSticky(sticky);
+			this.deleteSticky(stickyID);
 		}
 	}
 
 	for (stickyID in newStickies) {
 		if (this.stickies[stickyID] === undefined) {
-			// add new sticky
+			this.createSticky(newStickies[stickyID].x, 
+				newStickies[stickyID].y,
+				newStickies[stickyID].content,
+				stickyID);
 		}
 		else {
 			// update sticky
 			this.stickies[stickyID].x = newStickies[stickyID].x;
 			this.stickies[stickyID].y = newStickies[stickyID].y;
 			this.stickies[stickyID].content = newStickies[stickyID].content;
+			console.log(newStickies[stickyID].content);
 			this.stickies[stickyID].refreshElement();
 		}
+	}
+}
+
+stickyController.prototype.createSticky = function (x, y, content, id) {
+	this.stickies[id] = new sticky(this.createStickyElement(x, y, content), this, id);
+	this.stickies[id].x = x;
+	this.stickies[id].y = y;
+	this.stickies[id].content = content;
+}
+
+stickyController.prototype.createStickyElement = function(x, y, content) {
+	var element = document.createElement('div');
+	element.className = "sticky";
+	element.style.opacity = "0";
+
+	var contentBlock = document.createElement('div');
+	contentBlock.className = "stickyContentBlock";
+	contentBlock.textContent = content;
+	contentBlock.setAttribute("contenteditable", "true");
+
+	element.appendChild(contentBlock);
+	this.containingElement.appendChild(element);
+
+	rect = this.containingElement.getBoundingClientRect();
+
+	element.style.left = rect.left;
+	element.style.top = rect.top;
+
+	element.style.webkitTransform = element.style.transform = "translate(" + (x * (rect.right - rect.left))
+		+ "px, " + (y * (rect.bottom - rect.top)) + "px)";
+	element.style.opacity = "1";
+	return element;
 }
 
 stickyController.prototype.addSticky = function(element) {
@@ -71,6 +125,9 @@ stickyController.prototype.addSticky = function(element) {
 	while (this.stickies[l] !== undefined);
 
 	this.stickies[l] = new sticky(element, this, l);
+
+	this.hitAPI({r: 'new', x: this.stickies[l].x, y: this.stickies[l].y, c: this.stickies[l].content, id:l});
+
 }
 
 stickyController.prototype.addNewSticky = function() {
@@ -94,12 +151,18 @@ stickyController.prototype.stickyPutDown = function(id) {
 	if (this.xButtonHover == true) {
 		this.deleteSticky(id);
 	}
+	else {
+		this.stickies[id].updateAttributes();
+		this.hitAPI({r: 'move', x: this.stickies[id].x, y: this.stickies[id].y, 'id': id});
+	}
 	this.currentDrag = undefined;
 }
 
 stickyController.prototype.deleteSticky = function(id) {
+	console.log(id);
 	this.containingElement.removeChild(this.stickies[id].element);
 	delete this.stickies[id];
+	this.hitAPI({r: 'delete', 'id': id});
 }
 
 function newSticky(stickyController) {
@@ -231,6 +294,8 @@ function sticky(stickyElement, stickyController, id) {
 	this.contentBlockElement = this.element.children[0];
 	this.stickyController = stickyController;
 
+	this.updateAttributes();
+
 	this.isBeingDragged = false;
 
 	this.id = id;
@@ -251,6 +316,7 @@ function sticky(stickyElement, stickyController, id) {
 					this.stickyController.stickyPutDown(this.id);
 					this.isBeingDragged = false;
 					this.element.className = "sticky";
+					this.updateAttributes();
 				}
 				break;
 			case "mousemove":
@@ -270,21 +336,44 @@ function sticky(stickyElement, stickyController, id) {
 					+ "px, " + (e.clientY - this.initialY) + "px)";
 				// console.log(e);
 				break;
+			case "webkitTransitionEnd":
+			case "transitionend":
+				this.element.removeEventListener("webkitTransitionEnd", this);
+				this.element.removeEventListener("transitionend", this);
+
+				this.element.className = "sticky";
+				break;
 		}
 	};
 
 	this.element.addEventListener('mousedown', this);
 }
 
-sticky.prototype.createElement(stickyController) {
-	var element = document.createElement('div');
-	element.className = "sticky";
-	stickyController.containingElement.appendChild(element);
-	return element;
+
+sticky.prototype.refreshElement = function() {
+	rect = this.stickyController.containingElement.getBoundingClientRect();
+
+	this.contentBlockElement.textContent = this.content;
+
+	this.element.className = "sticky moveTransition";
+
+	this.element.addEventListener('webkitTransitionEnd', this);
+	this.element.addEventListener('transitionend', this);
+
+	this.element.style.left = rect.left;
+	this.element.style.top = rect.top;
+
+	this.element.style.webkitTransform = this.element.style.transform = "translate(" + (this.x * (rect.right - rect.left))
+		+ "px, " + (this.y * (rect.bottom - rect.top)) + "px)";
 }
 
-sticky.prototype.refreshElement() {
+sticky.prototype.updateAttributes = function() {
+	var cRect = this.stickyController.containingElement.getBoundingClientRect();
+	var rect = this.element.getBoundingClientRect();
 
+	this.x = (rect.left / (cRect.right - cRect.left));
+	this.y = (rect.top / (cRect.bottom - cRect.top));
+	this.content = this.contentBlockElement.textContent;
 }
 
 function alnumRandom() {
