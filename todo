@@ -1,13 +1,13 @@
 todo
 
-investigate sticky shifting over when put down after being newly created
+investigate sticky shifting over when put down after being newly created - done
 investigate stickies disappearing on creation (conflicting api requests)
 link highlighting
 pick-up/drop depth effects when dragging sticky
 investigate missing characters on api update (newline, etc)
 move to POST instead of get requests
 move stickies smoothly when window is being resized
-implement sticky text change api handling
+implement sticky text change api handling - done, sort of
 implement transition when sticky is removed upon fetching new stickies
 implement transition when sticky is moved upon fetching new stickies
 implement z-index shuffling so the currently focused sticky rises to the top

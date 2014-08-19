@@ -50,6 +50,7 @@ function stickyController(containingElement, endpoint){
 }
 
 stickyController.prototype.hitAPI = function(params){
+	console.log(params);
 	var controller = this;
 	this.requestsInProgress++;
 	var xhr = new XMLHttpRequest();
@@ -85,11 +86,10 @@ stickyController.prototype.updateStickies = function(newStickies) {
 		}
 		else {
 			// update sticky
-			if(stickyID != this.currentDrag){
+			if(stickyID != this.currentDrag && this.stickies[stickyID].contentBlockElement != document.activeElement){
 				this.stickies[stickyID].x = newStickies[stickyID].x;
 				this.stickies[stickyID].y = newStickies[stickyID].y;
 				this.stickies[stickyID].content = newStickies[stickyID].content;
-				console.log(newStickies[stickyID].content);
 				this.stickies[stickyID].refreshElement();
 			}
 		}
@@ -145,7 +145,7 @@ stickyController.prototype.addNewSticky = function() {
 }
 
 stickyController.prototype.editSticky = function(id, value) {
-
+	this.hitAPI({'id': id, r: 'edit', c: value});
 }
 
 stickyController.prototype.stickyPickUp = function(id) {
@@ -275,7 +275,6 @@ newSticky.prototype.expand = function() {
 				this.element.className = "newStickyButtonExpanded";
 				break;
 		}
-
 	};
 
 	this.plusElement.removeEventListener('click', this.plusHandler.bind(this));
@@ -352,10 +351,14 @@ function sticky(stickyElement, stickyController, id) {
 
 				this.element.className = "sticky";
 				break;
+			case "input":
+				this.stickyController.editSticky(this.id, this.contentBlockElement.textContent);
+				break;
 		}
 	};
 
 	this.element.addEventListener('mousedown', this);
+	this.contentBlockElement.addEventListener('input', this);
 }
 
 
@@ -380,8 +383,8 @@ sticky.prototype.updateAttributes = function() {
 	var cRect = this.stickyController.containingElement.getBoundingClientRect();
 	var rect = this.element.getBoundingClientRect();
 
-	this.x = (rect.left / (cRect.right - cRect.left));
-	this.y = (rect.top / (cRect.bottom - cRect.top));
+	this.x = ((rect.left - cRect.left) / (cRect.right - cRect.left));
+	this.y = ((rect.top - cRect.top) / (cRect.bottom - cRect.top));
 	this.content = this.contentBlockElement.textContent;
 }
 
